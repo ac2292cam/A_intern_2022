@@ -7,6 +7,7 @@ from scipy.io import loadmat
 import mat73
 
 imageset = mat73.loadmat('/nfs/st01/hpc-damtp/ac2292/dfi_exported_to_mat/exp_w109.mat')['DATA']
+
 print(f"imageset shape = {imageset.shape}")
 imageset = np.transpose(imageset, (2,0,1))
 print(f"imageset shape = {imageset.shape}")

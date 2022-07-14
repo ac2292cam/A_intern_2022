@@ -1,9 +1,10 @@
 import tensorflow as tf
-from tensorflow.keras.models import Sequential, Model
+import tensorflow.keras.models.Sequential as Sequential
+import tensorflow.keras.models.Model as Model
 from tensorflow.keras.layers import Dense, Input
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Reshape, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Reshape, Flatten, Dropout
 from scipy.io import loadmat
 
 first100images = loadmat('w135_first100images.mat')['DATAcropped']
@@ -20,43 +21,46 @@ X_test[:,:,:399,:] = X_test_original
 
 imageshape = X_train.shape[1:4]
 
-autoencoder = Sequential()
 
-# Encoder
-autoencoder.add(Conv2D(filters = 32, kernel_size=(3,3), activation='relu', padding='same', input_shape=imageshape))
-autoencoder.add(MaxPooling2D(pool_size=(2,2)))
 
-autoencoder.add(Conv2D(filters =16 , kernel_size=(3,3), activation='relu', padding='same'))
-autoencoder.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+autoencoder = Sequential([
 
-autoencoder.add(Conv2D(filters=8, kernel_size=(3,3), activation='relu', padding = 'same', strides=(2,2)))
-autoencoder.add(Flatten())
+    # Encoder
+    Conv2D(filters =  64, kernel_size=(7,7), activation='relu', padding='same', input_shape=imageshape, strides=(2,2))
+    MaxPooling2D(pool_size=(2,2))
 
-# Decoder
+    Conv2D(filters = 128 , kernel_size=(3,3), activation='relu', padding='same')
+    Conv2D(filters = 128 , kernel_size=(3,3), activation='relu', padding='same')
+    MaxPooling2D(pool_size=(2,2), padding='same')
 
-autoencoder.add(Reshape((415,50,8)))
+    Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding = 'same', strides=(2,2))
+    Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding = 'same', strides=(2,2))
+    MaxPooling2D(pool_size=(2,2), padding='same')
+    Flatten()
 
-autoencoder.add(Conv2D(filters = 8, kernel_size=(3,3), activation='relu', padding='same'))
-autoencoder.add(UpSampling2D(size=(2,2)))
+    # Decoder
 
-autoencoder.add(Conv2D(filters = 16, kernel_size=(3,3), activation='relu', padding='same'))
-autoencoder.add(UpSampling2D(size=(2,2)))
+    Dense(128, activation='relu')
+    Dropout(0.5))
 
-autoencoder.add(Conv2D(filters = 32, kernel_size=(3,3), activation='relu', padding='same'))
-autoencoder.add(UpSampling2D(size=(2,2)))
+    Dense(64, activation='relu')
+    Dropout(0.5)
+    Dense(10, activation='softmax')
+    ])
 
-autoencoder.add(Conv2D(filters = 1, kernel_size=(3,3), activation='sigmoid', padding='same'))
 print(autoencoder.summary())
 
-print('done set up autoencoder')
+print('finished setting up autoencoder')
 
 autoencoder.compile(optimizer='Adam', loss='binary_crossentropy', metrics = ['accuracy'])
-print('done compile')
-autoencoder.fit(X_train, X_train, epochs = 5)
+print('finished compiling')
+autoencoder.fit(X_train, X_train, epochs = 5, batch_size=1)
 print('finished training')
 
 encoder = Model(inputs = autoencoder.input, outputs = autoencoder.get_layer('flatten_10').output)
-coded_test_images = encoder.predict(X_test)
-decoded_test_images = autoencoder.predict(X_test)
+coded_test_images = encoder.predict(X_test, batch_size=1)
+decoded_test_images = autoencoder.predict(X_test, batch_size=1)
 
-print('finish')
+print('done')
+
+#%%
