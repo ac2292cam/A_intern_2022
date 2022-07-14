@@ -4,8 +4,9 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+import mat73
 
-imageset = loadmat('/nfs/st01/hpc-damtp/ac2292/dfi_exported_to_mat/exp_w109.mat')['DATAcropped']
+imageset = mat73.loadmat('/nfs/st01/hpc-damtp/ac2292/dfi_exported_to_mat/exp_w109.mat')['DATAcropped']
 print(f"imageset shape = {imageset.shape}")
 imageset = np.transpose(imageset, (2,0,1))
 print(f"imageset shape = {imageset.shape}")
