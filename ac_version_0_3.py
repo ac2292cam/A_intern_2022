@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.io import loadmat
 import mat73
 
-imageset = mat73.loadmat('/nfs/st01/hpc-damtp/ac2292/dfi_exported_to_mat/exp_w109.mat')['DATA']
+imageset = mat73.loadmat('/nfs/st01/hpc-damtp/ac2292/dfi_exported_to_mat/exp_w109.mat')['DATA'][:100]
 
 print(f"imageset shape = {imageset.shape}")
 imageset = np.transpose(imageset, (2,0,1))
@@ -33,7 +33,8 @@ def chop(originalimages, xpixels, ypixels):
 #chop into xpixel by ypixel images
 xpixels = 512
 ypixels = 256
-smallerimages = np.random.shuffle(chop(imageset, xpixels, ypixels))
+smallerimages = chop(imageset, xpixels, ypixels)
+np.random.shuffle(smallerimages)
 print(f"smaller images shape = {smallerimages.shape}")
 no_of_images = smallerimages.shape[0]
 no_of_training = int(no_of_images*0.9)
